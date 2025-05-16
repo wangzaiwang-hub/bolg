@@ -1,0 +1,40 @@
+---
+---
+
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>管理测试页面</title>
+  </head>
+  <body>
+    <div class="admin-test">
+      <h1>博客管理系统测试页面</h1>
+      <p>如果您能看到此页面，说明基本的Astro路由正常工作。</p>
+      <p>您可以尝试创建博客文章的两种方式：</p>
+      
+      <h2>方式1：通过文件系统</h2>
+      <p>在 <code>src/content/blog/</code> 目录下创建 Markdown 文件即可添加博客文章。</p>
+      
+      <h2>方式2：Supabase数据库（需要解决集成问题）</h2>
+      <p>在解决admin页面的React集成问题后，可以使用在线编辑功能。</p>
+    </div>
+    
+    <style>
+      .admin-test {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 2rem;
+        font-family: system-ui, sans-serif;
+      }
+      h1 {
+        color: #333;
+      }
+      code {
+        background-color: #f5f5f5;
+        padding: 0.2em 0.4em;
+        border-radius: 3px;
+      }
+    </style>
+  </body>
+</html> 

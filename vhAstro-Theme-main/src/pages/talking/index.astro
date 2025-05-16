@@ -1,0 +1,119 @@
+---
+import ToolLayout from "@/layouts/ToolLayout/ToolLayout.astro";
+import { talkingService } from '@/lib/supabase';
+import talking_data from "@/page_data/Talking";
+
+// 获取Supabase数据，如果失败则使用静态数据作为后备
+let talkingItems = [];
+try {
+  // 尝试从Supabase获取数据
+  if (typeof talkingService !== 'undefined') {
+    const data = await talkingService.getAllTalking();
+    if (data && data.length > 0) {
+      talkingItems = data;
+    }
+  }
+} catch (error) {
+  console.error('从数据库获取动态内容失败:', error);
+}
+
+// 如果Supabase获取失败，使用静态数据
+if (talkingItems.length === 0) {
+  talkingItems = talking_data.api ? await fetch(talking_data.api).then(res => res.json()).catch(() => talking_data.data) : talking_data.data;
+}
+
+// 按日期降序排序
+talkingItems = talkingItems.sort((a, b) => new Date(b.date) - new Date(a.date));
+---
+
+<ToolLayout 
+	title="动态"
+	h1="动态 🥫"
+	desc="记录美好生活."
+	type="talking"
+>
+    <div class="talking-info">
+        <div class="h-info-text">
+            <p>这里记录我想记录的生活～</p>
+        </div>
+    </div>
+    <div class="talking-lists">
+        {talkingItems.map(Item => (
+            <div class="talking-item">
+                <div class="talking-item-header">
+                    <div class="talking-item-date">{new Date(Item.date).toLocaleDateString('zh-CN')} {new Date(Item.date).toLocaleTimeString('zh-CN')}</div>
+                    <div class="talking-item-tag">
+                        {Item.tags && Item.tags.map(tag => (
+                            <a href={`/tags/${tag}`} target="_blank">#{tag}</a>
+                        ))}
+                    </div>
+                </div>
+                <div class="talking-item-content" set:html={Item.content}></div>
+            </div>
+        ))}
+    </div>
+</ToolLayout>
+
+<style lang="less">
+.talking-info {
+    margin-bottom: 30px;
+    border-radius: var(--vh-main-radius);
+    overflow: hidden;
+    padding: 38.8px;
+    background-color: #6a11cb;
+    background-image: linear-gradient(to right, #8e2de2 0%, #4a00e0 100%);
+    color: #fff;
+    position: relative;
+    .h-info-text {
+        max-width: 388px;
+    }
+    p {
+        letter-spacing: 0.3px;
+        margin: 0;
+    }
+}
+.talking-item {
+    padding: 2rem;
+    border-radius: var(--vh-main-radius);
+    background-color: #fff;
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.05);
+    margin-bottom: 2rem;
+    &-header {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 0.5rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 1px solid #eee;
+    }
+    &-date {
+        color: #666;
+        font-size: 0.9rem;
+    }
+    &-tag {
+        a {
+            margin-left: 0.5rem;
+            color: var(--vh-main-color);
+            text-decoration: none;
+            font-size: 0.9rem;
+            &:hover {
+                text-decoration: underline;
+            }
+        }
+    }
+    &-content {
+        line-height: 1.7;
+        img {
+            max-width: 100%;
+            border-radius: 0.5rem;
+            margin: 1rem 0;
+        }
+        a {
+            color: var(--vh-main-color);
+            text-decoration: none;
+            &:hover {
+                text-decoration: underline;
+            }
+        }
+    }
+}
+</style> 

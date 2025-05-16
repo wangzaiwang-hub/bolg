@@ -1,0 +1,138 @@
+---
+import ToolLayout from "@/layouts/ToolLayout/ToolLayout.astro";
+import { friendsService } from '@/lib/supabase';
+import friends_data from "@/page_data/Friends";
+
+// 获取Supabase数据，如果失败则使用静态数据作为后备
+let friendsItems = [];
+try {
+  // 尝试从Supabase获取数据
+  if (typeof friendsService !== 'undefined') {
+    const data = await friendsService.getAllFriends();
+    if (data && data.length > 0) {
+      friendsItems = data;
+    }
+  }
+} catch (error) {
+  console.error('从数据库获取朋友圈内容失败:', error);
+}
+
+// 如果Supabase获取失败，使用静态数据
+if (friendsItems.length === 0) {
+  friendsItems = friends_data.api ? await fetch(friends_data.api).then(res => res.json()).catch(() => friends_data.data) : friends_data.data;
+}
+
+// 按日期降序排序
+friendsItems.sort((a, b) => new Date(b.date) - new Date(a.date));
+---
+
+<ToolLayout 
+	title="朋友的新动态"
+	h1="朋友圈 🎴"
+	desc="这里展示朋友们的最新动态"
+	type="friends"
+>
+    <div class="friends-info">
+        <div class="h-info-text">
+            <p>这里将显示您添加的朋友的博客文章动态</p>
+            <p>添加朋友动态请使用管理面板</p>
+        </div>
+    </div>
+    <div class="friends-lists">
+        {
+            friendsItems.map(Item => (
+                <div class="friends-item">
+                    <div class="friends-item-header">
+                        <div class="friends-item-title">
+                            <a href={Item.link} target="_blank">{Item.title}</a>
+                        </div>
+                        <div class="friends-item-info">
+                            <span>{Item.auther}</span>
+                            <span>{new Date(Item.date).toLocaleDateString('zh-CN')}</span>
+                        </div>
+                    </div>
+                    <div class="friends-item-content">{Item.content}</div>
+                    <div class="friends-item-footer">
+                        <a href={Item.link} target="_blank" class="friends-item-link">查看原文</a>
+                    </div>
+                </div>
+            ))
+        }
+    </div>
+</ToolLayout>
+
+<style lang="less">
+.friends-info {
+    margin-bottom: 30px;
+    border-radius: var(--vh-main-radius);
+    overflow: hidden;
+    padding: 38.8px;
+    background-color: #6a11cb;
+    background-image: linear-gradient(to right, #8e2de2 0%, #4a00e0 100%);
+    color: #fff;
+    position: relative;
+    .h-info-text {
+        max-width: 388px;
+    }
+    p {
+        letter-spacing: 0.3px;
+        margin: 0;
+    }
+}
+.friends-item {
+    padding: 2rem;
+    border-radius: var(--vh-main-radius);
+    background-color: #fff;
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.05);
+    margin-bottom: 2rem;
+    &-header {
+        margin-bottom: 1rem;
+    }
+    &-title {
+        margin-bottom: 0.5rem;
+        a {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #333;
+            text-decoration: none;
+            &:hover {
+                color: var(--vh-main-color);
+            }
+        }
+    }
+    &-info {
+        font-size: 0.9rem;
+        color: #666;
+        span {
+            margin-right: 1rem;
+            &:last-child {
+                margin-right: 0;
+            }
+        }
+    }
+    &-content {
+        line-height: 1.7;
+        margin-bottom: 1.5rem;
+        color: #666;
+        overflow: hidden;
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+    }
+    &-footer {
+        text-align: right;
+    }
+    &-link {
+        display: inline-block;
+        padding: 0.5rem 1rem;
+        background-color: var(--vh-main-color);
+        color: #fff;
+        text-decoration: none;
+        border-radius: 0.25rem;
+        transition: background-color 0.3s;
+        &:hover {
+            background-color: darken(#01C4B6, 5%);
+        }
+    }
+}
+</style> 
